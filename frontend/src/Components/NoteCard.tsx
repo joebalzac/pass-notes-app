@@ -58,7 +58,6 @@ const NoteCard = () => {
         {allNotes.map((note) => (
           <div key={note.id}>
             <h3>{note.title}</h3>
-            <p>run tell that</p>
             <p>{note.content}</p>
           </div>
         ))}
