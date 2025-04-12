@@ -33,6 +33,15 @@ const NoteCard = () => {
     }
   };
 
+  const handleDeleteNote = async (noteId: number) => {
+    try {
+      await axios.delete(`http://localhost:8000/notes/${noteId}`);
+      setAllNotes((prev) => prev.filter((note) => note.id !== noteId));
+    } catch (err) {
+      console.log("unable to delete note");
+    }
+  };
+
   return (
     <div>
       <input
@@ -59,6 +68,9 @@ const NoteCard = () => {
           <div key={note.id}>
             <h3>{note.title}</h3>
             <p>{note.content}</p>
+            <button onClick={() => handleDeleteNote(note.id)}>
+              Delete Note
+            </button>
           </div>
         ))}
       </div>
