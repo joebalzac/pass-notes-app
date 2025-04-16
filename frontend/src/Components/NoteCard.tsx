@@ -1,5 +1,5 @@
 import { useState } from "react";
-import useData from "../Hooks/useData";
+import useData, { Note } from "../Hooks/useData";
 import axios from "axios";
 
 const NoteCard = () => {
@@ -10,7 +10,7 @@ const NoteCard = () => {
   const [editingTitle, setEditingTitle] = useState("");
   const [editingContent, setEditingContent] = useState("");
   const [editingTags, setEditingTags] = useState("");
-  const [editingId, setEditingId] = useState<number | null>(null);
+  const [editingId, setEditingId] = useState<string | null>(null);
 
   const [tags, setTags] = useState("");
 
@@ -38,7 +38,7 @@ const NoteCard = () => {
     }
   };
 
-  const handleDeleteNote = async (noteId: number) => {
+  const handleDeleteNote = async (noteId: string) => {
     try {
       await axios.delete(`http://localhost:8000/notes/${noteId}`);
       setAllNotes((prev) => prev.filter((note) => note.id !== noteId));
@@ -47,19 +47,33 @@ const NoteCard = () => {
     }
   };
 
-  const handleEditTitle = (title: string, id: number) => {
-    setEditingTitle(title);
-    setEditingId(id);
+  const handleEditNote = (note: Note) => {
+    setEditingTitle(note.title);
+    setEditingContent(note.content);
+    setEditingTags(note.tags.join(", "));
+    setEditingId(note.id);
   };
 
-  const handleSaveNote = () => {
-    if (editingId !== null && editingTitle.trim()) {
-      setAllNotes(
-        allNotes.map((note) =>
-          editingId === note.id ? { ...note, title: editingTitle } : note
-        )
+  const handleSaveNote = async () => {
+    if (!editingId) return;
+
+    try {
+      const res = await axios.put(`http://localhost:8000/notes/${editingId}`, {
+        title: editingTitle,
+        content: editingContent,
+        tags: editingTags,
+      });
+
+      setAllNotes((prev) =>
+        prev.map((note) => (note.id === editingId ? res.data : note))
       );
+
+      setEditingTitle("");
+      setEditingContent("");
+      setEditingTags("");
       setEditingId(null);
+    } catch (err) {
+      console.log("unable to edit note", err);
     }
   };
 
@@ -93,6 +107,14 @@ const NoteCard = () => {
                   type="text"
                   onChange={(e) => setEditingTitle(e.target.value)}
                 />
+                <input
+                  type="text"
+                  onChange={(e) => setEditingContent(e.target.value)}
+                />
+                <input
+                  type="text"
+                  onChange={(e) => setEditingTags(e.target.value)}
+                />
                 <button onClick={handleSaveNote}>Save</button>
               </div>
             ) : (
@@ -100,10 +122,11 @@ const NoteCard = () => {
                 <div key={note.id}>
                   <h3>{note.title}</h3>
                   <p>{note.content}</p>
+                  <p>{note.tags}</p>
                   <button onClick={() => handleDeleteNote(note.id)}>
                     Delete Note
                   </button>
-                  <button onClick={() => handleEditTitle(note.title, note.id)}>
+                  <button onClick={() => handleEditNote(note)}>
                     Edit Note
                   </button>
                 </div>

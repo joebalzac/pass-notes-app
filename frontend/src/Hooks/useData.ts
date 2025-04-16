@@ -1,10 +1,11 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
 
-interface Note {
-  id: number;
+export interface Note {
+  id: string;
   title: string;
   content: string;
+  tags: string[];
 }
 
 const useData = () => {
