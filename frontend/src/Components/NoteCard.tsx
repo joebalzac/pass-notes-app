@@ -7,6 +7,11 @@ const NoteCard = () => {
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [allNotes, setAllNotes] = useState(notes);
+  const [editingTitle, setEditingTitle] = useState("");
+  const [editingContent, setEditingContent] = useState("");
+  const [editingTags, setEditingTags] = useState("");
+  const [editingId, setEditingId] = useState<number | null>(null);
+
   const [tags, setTags] = useState("");
 
   if (isLoading) {
@@ -42,6 +47,22 @@ const NoteCard = () => {
     }
   };
 
+  const handleEditTitle = (title: string, id: number) => {
+    setEditingTitle(title);
+    setEditingId(id);
+  };
+
+  const handleSaveNote = () => {
+    if (editingId !== null && editingTitle.trim()) {
+      setAllNotes(
+        allNotes.map((note) =>
+          editingId === note.id ? { ...note, title: editingTitle } : note
+        )
+      );
+      setEditingId(null);
+    }
+  };
+
   return (
     <div>
       <input
@@ -65,12 +86,29 @@ const NoteCard = () => {
 
       <div>
         {allNotes.map((note) => (
-          <div key={note.id}>
-            <h3>{note.title}</h3>
-            <p>{note.content}</p>
-            <button onClick={() => handleDeleteNote(note.id)}>
-              Delete Note
-            </button>
+          <div>
+            {editingId === note.id ? (
+              <div>
+                <input
+                  type="text"
+                  onChange={(e) => setEditingTitle(e.target.value)}
+                />
+                <button onClick={handleSaveNote}>Save</button>
+              </div>
+            ) : (
+              <div>
+                <div key={note.id}>
+                  <h3>{note.title}</h3>
+                  <p>{note.content}</p>
+                  <button onClick={() => handleDeleteNote(note.id)}>
+                    Delete Note
+                  </button>
+                  <button onClick={() => handleEditTitle(note.title, note.id)}>
+                    Edit Note
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         ))}
       </div>
