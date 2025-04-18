@@ -23,9 +23,11 @@ class NoteCreate(BaseModel):
     title: str
     content: str
     tags: Optional[List[str]] = []
+    read: bool
 
 class Note(NoteCreate):
     id: str
+    read: bool
     created_at: datetime
     updated_at: datetime
 
@@ -40,6 +42,7 @@ def create_note(note: NoteCreate):
         title=note.title,
         content=note.content,
         tags=note.tags or [],
+        read=note.read,
         created_at=datetime.utcnow(),
         updated_at=datetime.utcnow()
     )
@@ -61,6 +64,7 @@ def update_note(note_id: str, updated_note: NoteCreate):
                 "title": updated_note.title,
                 "content": updated_note.content,
                 "tags": updated_note.tags or [],
+                "read": updated_note.read,
                 "updated_at": datetime.utcnow()
             })
             notes_db[index] = updated

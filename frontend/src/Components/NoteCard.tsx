@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import useData, { Note } from "../Hooks/useData";
 import axios from "axios";
 
@@ -11,7 +11,13 @@ const NoteCard = () => {
   const [editingContent, setEditingContent] = useState("");
   const [editingTags, setEditingTags] = useState("");
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [selectedNote, setSelectedNote] = useState<Note | null>(null);
+  const [selectedNoteIds, setSelectedNoteIds] = useState<string[]>([]);
   const [tags, setTags] = useState("");
+
+  useEffect(() => {
+    setAllNotes(notes);
+  }, [notes]);
 
   if (isLoading)
     return <div className="text-center text-gray-400">Loading...</div>;
@@ -26,6 +32,7 @@ const NoteCard = () => {
         title,
         content,
         tags: tags.split(",").map((tag) => tag.trim()),
+        read: false,
       });
       setAllNotes([...allNotes, res.data]);
       setTitle("");
@@ -75,6 +82,37 @@ const NoteCard = () => {
     }
   };
 
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement>,
+    id: string
+  ) => {
+    setSelectedNoteIds(
+      e.target.checked
+        ? [...selectedNoteIds, id]
+        : selectedNoteIds.filter((noteId) => noteId !== id)
+    );
+  };
+
+  const handleSelectNote = (note: Note) => {
+    setSelectedNote(note);
+    setAllNotes(
+      allNotes.map((n) => (n.id === note.id ? { ...n, read: true } : n))
+    );
+  };
+
+  const toggleReadStatus = () => {
+    setAllNotes(
+      notes.map((note) => ({
+        ...note,
+        read: selectedNoteIds.includes(note.id) ? true : note.read,
+      }))
+    );
+  };
+
+  const allSelectedRead = selectedNoteIds.every(
+    (id) => allNotes.find((note) => note.id === id)?.read === true
+  );
+
   return (
     <div className="min-h-screen bg-[#0f0f0f] text-gray-200 px-6 py-12 font-sans transition-all">
       <div className="max-w-2xl mx-auto text-center mb-12">
@@ -114,10 +152,22 @@ const NoteCard = () => {
       </div>
 
       <div className="max-w-xl mx-auto space-y-6">
+        <button
+          onClick={toggleReadStatus}
+          className="rounded-sm bg-pink-300 py-2 px-4 cursor-pointer"
+        >
+          {allSelectedRead ? "Mark as Unread" : "Mark as Read"}
+        </button>
         {allNotes.map((note) => (
           <div
             key={note.id}
-            className="bg-[#181818] border border-[#2a2a2a] rounded-lg p-5 shadow-sm hover:shadow-md transition"
+            className={`border border-[#2a2a2a] rounded-lg p-5 shadow-sm hover:shadow-md transition 
+           bg-gradient-to-br 
+           ${
+             note.read
+               ? "from-pink-500 via-fuchsia-600 to-purple-800 text-white"
+               : "from-[#1a1a1a] via-[#0f0f0f] to-black text-white"
+           }`}
           >
             {editingId === note.id ? (
               <div className="space-y-3">
@@ -148,6 +198,10 @@ const NoteCard = () => {
               </div>
             ) : (
               <>
+                <input
+                  type="checkbox"
+                  onChange={(e) => handleInputChange(e, note.id)}
+                />
                 <h3 className="text-xl font-mono font-semibold text-white">
                   {note.title}
                 </h3>
@@ -181,7 +235,9 @@ const NoteCard = () => {
                   >
                     Edit
                   </button>
+                  <button onClick={() => handleSelectNote(note)}>Read</button>
                 </div>
+                {console.log(notes)}
               </>
             )}
           </div>
