@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { act, useEffect, useState } from "react";
 import useData, { Note } from "../Hooks/useData";
 import axios from "axios";
 
@@ -13,6 +13,7 @@ const NoteCard = () => {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [selectedNote, setSelectedNote] = useState<Note | null>(null);
   const [selectedNoteIds, setSelectedNoteIds] = useState<string[]>([]);
+  const [activeTag, setActiveTag] = useState<string | null>(null);
   const [tags, setTags] = useState("");
 
   useEffect(() => {
@@ -113,6 +114,14 @@ const NoteCard = () => {
     (id) => allNotes.find((note) => note.id === id)?.read === true
   );
 
+  const uniqueTags = Array.from(
+    allNotes.flatMap((note) => note.tags.map((tag) => tag.trim()))
+  );
+
+  const filteredNotes = activeTag
+    ? allNotes.filter((note) => note.tags.includes(activeTag))
+    : allNotes;
+
   return (
     <div className="min-h-screen bg-[#0f0f0f] text-gray-200 px-6 py-12 font-sans transition-all">
       <div className="max-w-2xl mx-auto text-center mb-12">
@@ -158,15 +167,34 @@ const NoteCard = () => {
         >
           {allSelectedRead ? "Mark as Unread" : "Mark as Read"}
         </button>
-        {allNotes.map((note) => (
+
+        <div className="flex flex-wrap gap-2 justify-center mb-6">
+          {uniqueTags.map((tag) => (
+            <div>
+              <button
+                key={tag}
+                onClick={() => setActiveTag(activeTag === tag ? null : tag)}
+                className={`cursor-pointer px-3 py-1 rounded-full text-sm border transition 
+        ${
+          activeTag === tag
+            ? "bg-[#f3f97a] text-black"
+            : "bg-[#1a1a1a] text-white border-[#333]"
+        }`}
+              >
+                {tag}
+              </button>
+            </div>
+          ))}
+        </div>
+        {filteredNotes.map((note) => (
           <div
             key={note.id}
             className={`border border-[#2a2a2a] rounded-lg p-5 shadow-sm hover:shadow-md transition 
            bg-gradient-to-br 
            ${
              note.read
-               ? "from-pink-500 via-fuchsia-600 to-purple-800 text-white"
-               : "from-[#1a1a1a] via-[#0f0f0f] to-black text-white"
+               ? "from-[#1a1a1a] via-[#0f0f0f] to-black text-white"
+               : "from-pink-500 via-fuchsia-600 to-purple-800 text-white"
            }`}
           >
             {editingId === note.id ? (
