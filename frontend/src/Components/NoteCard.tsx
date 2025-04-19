@@ -1,4 +1,4 @@
-import { act, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import useData, { Note } from "../Hooks/useData";
 import axios from "axios";
 
@@ -115,7 +115,7 @@ const NoteCard = () => {
   );
 
   const uniqueTags = Array.from(
-    allNotes.flatMap((note) => note.tags.map((tag) => tag.trim()))
+    new Set(allNotes.flatMap((note) => note.tags.map((tag) => tag.trim())))
   );
 
   const filteredNotes = activeTag
@@ -160,59 +160,55 @@ const NoteCard = () => {
         </button>
       </div>
 
-      <div className="max-w-xl mx-auto space-y-6">
+      <div className="max-w-xl mx-auto space-y-6 mt-12">
         <button
           onClick={toggleReadStatus}
-          className="rounded-sm bg-pink-300 py-2 px-4 cursor-pointer"
+          className="rounded-md bg-pink-400 hover:bg-pink-300 transition px-4 py-2 font-medium text-black mb-6"
         >
           {allSelectedRead ? "Mark as Unread" : "Mark as Read"}
         </button>
 
-        <div className="flex flex-wrap gap-2 justify-center mb-6">
+        <div className="flex flex-wrap gap-2 justify-center mb-8">
           {uniqueTags.map((tag) => (
-            <div>
-              <button
-                key={tag}
-                onClick={() => setActiveTag(activeTag === tag ? null : tag)}
-                className={`cursor-pointer px-3 py-1 rounded-full text-sm border transition 
-        ${
-          activeTag === tag
-            ? "bg-[#f3f97a] text-black"
-            : "bg-[#1a1a1a] text-white border-[#333]"
-        }`}
-              >
-                {tag}
-              </button>
-            </div>
+            <button
+              key={tag}
+              onClick={() => setActiveTag(activeTag === tag ? null : tag)}
+              className={`px-3 py-1 rounded-full text-sm font-medium border transition-all duration-200 hover:scale-105 ${
+                activeTag === tag
+                  ? "bg-[#f3f97a] text-black shadow"
+                  : "bg-[#1a1a1a] text-white border-[#333] hover:bg-[#2a2a2a]"
+              }`}
+            >
+              {tag}
+            </button>
           ))}
         </div>
+
         {filteredNotes.map((note) => (
           <div
             key={note.id}
-            className={`border border-[#2a2a2a] rounded-lg p-5 shadow-sm hover:shadow-md transition 
-           bg-gradient-to-br 
-           ${
-             note.read
-               ? "from-[#1a1a1a] via-[#0f0f0f] to-black text-white"
-               : "from-pink-500 via-fuchsia-600 to-purple-800 text-white"
-           }`}
+            className={`border rounded-lg px-4 py-3 sm:px-5 sm:py-4 transition-all shadow-sm hover:shadow-md bg-gradient-to-br ${
+              note.read
+                ? "from-[#1a1a1a] via-[#121212] to-[#1f1f1f] border-[#2a2a2a]"
+                : "from-[#1a1a1a] via-[#161616] to-[#222] border-pink-400"
+            } max-w-2xl mx-auto`}
           >
             {editingId === note.id ? (
               <div className="space-y-3">
                 <input
-                  className="w-full bg-[#101010] text-white placeholder-gray-500 border border-[#2a2a2a] rounded-md p-2"
+                  className="w-full bg-[#101010] text-white placeholder-gray-500 border border-[#2a2a2a] rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-[#f3f97a] transition"
                   type="text"
                   value={editingTitle}
                   onChange={(e) => setEditingTitle(e.target.value)}
                 />
                 <input
-                  className="w-full bg-[#101010] text-white placeholder-gray-500 border border-[#2a2a2a] rounded-md p-2"
+                  className="w-full bg-[#101010] text-white placeholder-gray-500 border border-[#2a2a2a] rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-[#f3f97a] transition"
                   type="text"
                   value={editingContent}
                   onChange={(e) => setEditingContent(e.target.value)}
                 />
                 <input
-                  className="w-full bg-[#101010] text-white placeholder-gray-500 border border-[#2a2a2a] rounded-md p-2"
+                  className="w-full bg-[#101010] text-white placeholder-gray-500 border border-[#2a2a2a] rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-[#f3f97a] transition"
                   type="text"
                   value={editingTags}
                   onChange={(e) => setEditingTags(e.target.value)}
@@ -226,14 +222,18 @@ const NoteCard = () => {
               </div>
             ) : (
               <>
-                <input
-                  type="checkbox"
-                  onChange={(e) => handleInputChange(e, note.id)}
-                />
-                <h3 className="text-xl font-mono font-semibold text-white">
-                  {note.title}
-                </h3>
-                <p className="text-gray-300 mt-2 whitespace-pre-line">
+                <div className="flex items-center gap-2 mb-2">
+                  <input
+                    type="checkbox"
+                    onChange={(e) => handleInputChange(e, note.id)}
+                    className="accent-[#f3f97a] cursor-pointer"
+                  />
+                  <h3 className="text-base sm:text-lg font-semibold text-white tracking-tight leading-tight">
+                    {note.title}
+                  </h3>
+                </div>
+
+                <p className="text-sm text-gray-400 leading-normal mt-1">
                   {note.content}
                 </p>
 
@@ -250,22 +250,26 @@ const NoteCard = () => {
                   </div>
                 )}
 
-                <div className="mt-4 flex gap-4 text-sm">
+                <div className="mt-4 flex gap-4 text-xs sm:text-sm text-gray-300">
                   <button
-                    className="text-red-400 hover:underline cursor-pointer"
+                    className="hover:text-red-400 transition"
                     onClick={() => handleDeleteNote(note.id)}
                   >
                     Delete
                   </button>
                   <button
-                    className="text-gray-400 hover:underline cursor-pointer"
+                    className="hover:text-yellow-300 transition"
                     onClick={() => handleEditNote(note)}
                   >
                     Edit
                   </button>
-                  <button onClick={() => handleSelectNote(note)}>Read</button>
+                  <button
+                    className="hover:text-green-300 transition"
+                    onClick={() => handleSelectNote(note)}
+                  >
+                    Read
+                  </button>
                 </div>
-                {console.log(notes)}
               </>
             )}
           </div>
