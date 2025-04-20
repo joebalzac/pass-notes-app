@@ -226,6 +226,7 @@ const NoteCard = () => {
         </button>
       </div>
 
+      {/* Notes Section  */}
       <div className="grid grid-cols-2 w-full">
         <div>
           {sortedFilteredNotes.map((note) => (
@@ -235,6 +236,7 @@ const NoteCard = () => {
                   ? "from-[#1a1a1a] via-[#121212] to-[#1f1f1f] border-[#2a2a2a]"
                   : "from-[#1a1a1a] via-[#161616] to-[#222] border-pink-400"
               } space-y-2 max-w-2xl mx-auto my-4`}
+              onClick={() => handleSelectNote(note)}
             >
               {editingId === note.id ? (
                 <div className="space-y-3">
@@ -265,10 +267,19 @@ const NoteCard = () => {
                 </div>
               ) : (
                 <>
-                  <div className="flex justify-between items-center">
-                    <h3 className="text-sm sm:text-base font-semibold text-white truncate">
-                      {note.title}
-                    </h3>
+                  <div className="flex justify-between items-center gap-4">
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="checkbox"
+                        checked={selectedNoteIds.includes(note.id)}
+                        onChange={(e) => handleInputChange(e, note.id)}
+                        onClick={(e) => e.stopPropagation()}
+                        className="accent-[#f3f97a] cursor-pointer"
+                      />
+                      <h3 className="text-sm sm:text-base font-semibold text-white truncate max-w-[12rem] sm:max-w-xs">
+                        {note.title}
+                      </h3>
+                    </div>
                     <div className="flex flex-wrap gap-1">
                       {note.tags.map((tag, idx) => (
                         <span
