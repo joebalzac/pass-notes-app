@@ -1,6 +1,7 @@
-import { act, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import useData, { Note } from "../Hooks/useData";
 import axios from "axios";
+import { FaPencil, FaTrashCan } from "react-icons/fa6";
 
 const NoteCard = () => {
   const { notes, isLoading, error } = useData();
@@ -74,6 +75,8 @@ const NoteCard = () => {
         content: editingContent,
         tags: editingTags.split(",").map((tag) => tag.trim()),
         read: currentNote.read,
+        created_at: currentNote.created_at,
+        updated_at: currentNote.updated_at,
       });
 
       setAllNotes((prev) =>
@@ -133,6 +136,21 @@ const NoteCard = () => {
     return matchesTag && matchesSearch;
   });
 
+  const sortedFilteredNotes = filteredNotes.sort((a, b) =>
+    a.title.localeCompare(b.title)
+  );
+
+  const formatDateTime = (iso: string) => {
+    const date = new Date(iso);
+    return date.toLocaleString("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+      hour: "numeric",
+      minute: "2-digit",
+    });
+  };
+
   return (
     <div className="min-h-screen bg-[#0f0f0f] text-gray-200 px-6 py-12 font-sans transition-all">
       <div className="max-w-2xl mx-auto text-center mb-12">
@@ -144,6 +162,7 @@ const NoteCard = () => {
         </p>
       </div>
 
+      {/* Create Note Section */}
       <div className="max-w-xl mx-auto mb-10 space-y-4">
         <input
           className="w-full bg-[#1a1a1a] text-white placeholder-gray-500 rounded-md p-3 text-lg focus:outline-none focus:ring-2 focus:ring-[#f3f97a] transition"
@@ -171,132 +190,137 @@ const NoteCard = () => {
         </button>
       </div>
 
-      <div className="max-w-xl mx-auto space-y-6 mt-12">
-        <div className="flex">
-          <div className="flex flex-wrap gap-2 justify-center mb-8">
-            {uniqueTags.map((tag) => (
-              <button
-                key={tag}
-                onClick={() => setActiveTag(activeTag === tag ? null : tag)}
-                className={`px-3 py-1 rounded-full text-sm font-medium border transition-all duration-200 hover:scale-105 ${
-                  activeTag === tag
-                    ? "bg-[#f3f97a] text-black shadow"
-                    : "bg-[#1a1a1a] text-white border-[#333] hover:bg-[#2a2a2a]"
-                }`}
-              >
-                {tag}
-              </button>
-            ))}
-          </div>
+      <div className="max-w-5xl mx-auto flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
+        {/* Search Input */}
+        <input
+          type="text"
+          value={searchNote}
+          onChange={(e) => setSearchNote(e.target.value)}
+          placeholder="Search notes..."
+          className="flex-1 bg-[#1a1a1a] text-white placeholder-gray-500 rounded-md p-3 focus:outline-none focus:ring-2 focus:ring-[#f3f97a] transition"
+        />
 
-          <div className="max-w-xl mx-auto mb-6">
-            <input
-              type="text"
-              value={searchNote}
-              onChange={(e) => setSearchNote(e.target.value)}
-              placeholder="Search by title or content..."
-              className="w-full bg-[#1a1a1a] text-white placeholder-gray-500 rounded-md p-3 focus:outline-none focus:ring-2 focus:ring-[#f3f97a] transition"
-            />
-          </div>
-
-          <button
-            onClick={toggleReadStatus}
-            className="rounded-md bg-pink-400 hover:bg-pink-300 transition px-4 py-2 font-medium text-black mb-6"
-          >
-            {allSelectedRead ? "Mark as Unread" : "Mark as Read"}
-          </button>
+        {/* Tag Filters */}
+        <div className="flex flex-wrap gap-2 justify-center sm:justify-end">
+          {uniqueTags.map((tag) => (
+            <button
+              key={tag}
+              onClick={() => setActiveTag(activeTag === tag ? null : tag)}
+              className={`px-3 py-1 rounded-full text-xs font-medium border transition hover:scale-105 ${
+                activeTag === tag
+                  ? "bg-[#f3f97a] text-black shadow"
+                  : "bg-[#1a1a1a] text-white border-[#333] hover:bg-[#2a2a2a]"
+              }`}
+            >
+              {tag}
+            </button>
+          ))}
         </div>
 
-        {filteredNotes.map((note) => (
-          <div
-            key={note.id}
-            className={`border rounded-lg px-4 py-3 sm:px-5 sm:py-4 transition-all shadow-sm hover:shadow-md bg-gradient-to-br ${
-              note.read
-                ? "from-[#1a1a1a] via-[#121212] to-[#1f1f1f] border-[#2a2a2a]"
-                : "from-[#1a1a1a] via-[#161616] to-[#222] border-pink-400"
-            } max-w-2xl mx-auto`}
-          >
-            {editingId === note.id ? (
-              <div className="space-y-3">
-                <input
-                  className="w-full bg-[#101010] text-white placeholder-gray-500 border border-[#2a2a2a] rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-[#f3f97a] transition"
-                  type="text"
-                  value={editingTitle}
-                  onChange={(e) => setEditingTitle(e.target.value)}
-                />
-                <input
-                  className="w-full bg-[#101010] text-white placeholder-gray-500 border border-[#2a2a2a] rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-[#f3f97a] transition"
-                  type="text"
-                  value={editingContent}
-                  onChange={(e) => setEditingContent(e.target.value)}
-                />
-                <input
-                  className="w-full bg-[#101010] text-white placeholder-gray-500 border border-[#2a2a2a] rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-[#f3f97a] transition"
-                  type="text"
-                  value={editingTags}
-                  onChange={(e) => setEditingTags(e.target.value)}
-                />
-                <button
-                  className="bg-[#b0fdb6] hover:bg-[#a1f2aa] text-black px-4 py-2 rounded-md transition font-medium cursor-pointer"
-                  onClick={handleSaveNote}
-                >
-                  Save
-                </button>
-              </div>
-            ) : (
-              <>
-                <div className="flex items-center gap-2 mb-2">
+        {/* Mark as Read Button */}
+        <button
+          onClick={toggleReadStatus}
+          className="rounded-md bg-pink-400 hover:bg-pink-300 transition px-4 py-2 text-xs sm:text-sm font-medium text-black"
+        >
+          {allSelectedRead ? "Mark as Unread" : "Mark as Read"}
+        </button>
+      </div>
+
+      <div className="grid grid-cols-2 w-full">
+        <div>
+          {sortedFilteredNotes.map((note) => (
+            <div
+              className={`border rounded-lg px-4 py-3 shadow-sm hover:shadow-md bg-gradient-to-br cursor-pointer ${
+                note.read
+                  ? "from-[#1a1a1a] via-[#121212] to-[#1f1f1f] border-[#2a2a2a]"
+                  : "from-[#1a1a1a] via-[#161616] to-[#222] border-pink-400"
+              } space-y-2 max-w-2xl mx-auto my-4`}
+            >
+              {editingId === note.id ? (
+                <div className="space-y-3">
                   <input
-                    type="checkbox"
-                    onChange={(e) => handleInputChange(e, note.id)}
-                    className="accent-[#f3f97a] cursor-pointer"
+                    className="w-full bg-[#101010] text-white placeholder-gray-500 border border-[#2a2a2a] rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-[#f3f97a] transition"
+                    type="text"
+                    value={editingTitle}
+                    onChange={(e) => setEditingTitle(e.target.value)}
                   />
-                  <h3 className="text-base sm:text-lg font-semibold text-white tracking-tight leading-tight">
-                    {note.title}
-                  </h3>
+                  <input
+                    className="w-full bg-[#101010] text-white placeholder-gray-500 border border-[#2a2a2a] rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-[#f3f97a] transition"
+                    type="text"
+                    value={editingContent}
+                    onChange={(e) => setEditingContent(e.target.value)}
+                  />
+                  <input
+                    className="w-full bg-[#101010] text-white placeholder-gray-500 border border-[#2a2a2a] rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-[#f3f97a] transition"
+                    type="text"
+                    value={editingTags}
+                    onChange={(e) => setEditingTags(e.target.value)}
+                  />
+                  <button
+                    className="bg-[#b0fdb6] hover:bg-[#a1f2aa] text-black px-4 py-2 rounded-md transition font-medium cursor-pointer"
+                    onClick={handleSaveNote}
+                  >
+                    Save
+                  </button>
                 </div>
-
-                <p className="text-sm text-gray-400 leading-normal mt-1">
-                  {note.content}
-                </p>
-
-                {note.tags && (
-                  <div className="flex flex-wrap gap-2 mt-3">
-                    {note.tags.map((tag, idx) => (
-                      <span
-                        key={idx}
-                        className="bg-[#1e1e1e] text-[#f3f97a] text-xs px-2 py-0.5 rounded border border-[#2a2a2a]"
-                      >
-                        {tag.trim()}
-                      </span>
-                    ))}
+              ) : (
+                <>
+                  <div className="flex justify-between items-center">
+                    <h3 className="text-sm sm:text-base font-semibold text-white truncate">
+                      {note.title}
+                    </h3>
+                    <div className="flex flex-wrap gap-1">
+                      {note.tags.map((tag, idx) => (
+                        <span
+                          key={idx}
+                          className="bg-[#1e1e1e] text-[#f3f97a] text-[10px] px-2 py-[2px] rounded-full border border-[#2a2a2a]"
+                        >
+                          {tag.trim()}
+                        </span>
+                      ))}
+                    </div>
                   </div>
-                )}
 
-                <div className="mt-4 flex gap-4 text-xs sm:text-sm text-gray-300">
-                  <button
-                    className="hover:text-red-400 transition"
-                    onClick={() => handleDeleteNote(note.id)}
-                  >
-                    Delete
-                  </button>
-                  <button
-                    className="hover:text-yellow-300 transition"
-                    onClick={() => handleEditNote(note)}
-                  >
-                    Edit
-                  </button>
-                  <button
-                    className="hover:text-green-300 transition"
-                    onClick={() => handleSelectNote(note)}
-                  >
-                    Read
-                  </button>
-                </div>
-              </>
-            )}
-          </div>
-        ))}
+                  <div className="flex justify-between items-center text-xs text-gray-500 mt-2">
+                    <span>
+                      Updated: {formatDateTime(String(note.updated_at))}
+                    </span>
+                    <div className="flex gap-3 text-gray-400">
+                      <button
+                        className="hover:text-red-400 transition"
+                        onClick={() => handleDeleteNote(note.id)}
+                      >
+                        <FaTrashCan />
+                      </button>
+                      <button
+                        className="hover:text-yellow-300 transition"
+                        onClick={() => handleEditNote(note)}
+                      >
+                        <FaPencil />
+                      </button>
+                    </div>
+                  </div>
+                </>
+              )}
+            </div>
+          ))}
+        </div>
+
+        <div>
+          {selectedNote ? (
+            <div className="border rounded-lg px-4 py-3 sm:px-5 sm:py-4 transition-all shadow-sm hover:shadow-md bg-gradient-to-br from-[#1a1a1a] via-[#121212] to-[#1f1f1f] border-[#2a2a2a] cursor-pointer">
+              <h3 className="text-base sm:text-lg font-semibold text-white tracking-tight leading-tight">
+                {selectedNote.title}
+              </h3>
+
+              <p className="text-sm text-gray-400 leading-normal mt-1">
+                {selectedNote.content}
+              </p>
+            </div>
+          ) : (
+            <div>Select a note to read...</div>
+          )}
+        </div>
       </div>
     </div>
   );

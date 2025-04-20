@@ -7,6 +7,8 @@ export interface Note {
   content: string;
   tags: string[];
   read: boolean;
+  created_at: number;
+  updated_at: number;
 }
 
 const useData = () => {
