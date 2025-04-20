@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { act, useEffect, useState } from "react";
 import useData, { Note } from "../Hooks/useData";
 import axios from "axios";
 
@@ -10,8 +10,10 @@ const NoteCard = () => {
   const [editingTitle, setEditingTitle] = useState("");
   const [editingContent, setEditingContent] = useState("");
   const [editingTags, setEditingTags] = useState("");
+
   const [editingId, setEditingId] = useState<string | null>(null);
   const [selectedNote, setSelectedNote] = useState<Note | null>(null);
+  const [searchNote, setSearchNote] = useState<string>("");
   const [selectedNoteIds, setSelectedNoteIds] = useState<string[]>([]);
   const [activeTag, setActiveTag] = useState<string | null>(null);
   const [tags, setTags] = useState("");
@@ -63,11 +65,15 @@ const NoteCard = () => {
   const handleSaveNote = async () => {
     if (!editingId) return;
 
+    const currentNote = allNotes.find((n) => n.id === editingId);
+    if (!currentNote) return;
+
     try {
       const res = await axios.put(`http://localhost:8000/notes/${editingId}`, {
         title: editingTitle,
         content: editingContent,
         tags: editingTags.split(",").map((tag) => tag.trim()),
+        read: currentNote.read,
       });
 
       setAllNotes((prev) =>
@@ -118,9 +124,14 @@ const NoteCard = () => {
     new Set(allNotes.flatMap((note) => note.tags.map((tag) => tag.trim())))
   );
 
-  const filteredNotes = activeTag
-    ? allNotes.filter((note) => note.tags.includes(activeTag))
-    : allNotes;
+  const filteredNotes = allNotes.filter((note) => {
+    const matchesTag = activeTag ? note.tags.includes(activeTag) : true;
+    const matchesSearch = searchNote
+      ? note.title.toLowerCase().includes(searchNote.toLocaleLowerCase()) ||
+        note.content.toLowerCase().includes(searchNote.toLowerCase())
+      : true;
+    return matchesTag && matchesSearch;
+  });
 
   return (
     <div className="min-h-screen bg-[#0f0f0f] text-gray-200 px-6 py-12 font-sans transition-all">
@@ -161,27 +172,39 @@ const NoteCard = () => {
       </div>
 
       <div className="max-w-xl mx-auto space-y-6 mt-12">
-        <button
-          onClick={toggleReadStatus}
-          className="rounded-md bg-pink-400 hover:bg-pink-300 transition px-4 py-2 font-medium text-black mb-6"
-        >
-          {allSelectedRead ? "Mark as Unread" : "Mark as Read"}
-        </button>
+        <div className="flex">
+          <div className="flex flex-wrap gap-2 justify-center mb-8">
+            {uniqueTags.map((tag) => (
+              <button
+                key={tag}
+                onClick={() => setActiveTag(activeTag === tag ? null : tag)}
+                className={`px-3 py-1 rounded-full text-sm font-medium border transition-all duration-200 hover:scale-105 ${
+                  activeTag === tag
+                    ? "bg-[#f3f97a] text-black shadow"
+                    : "bg-[#1a1a1a] text-white border-[#333] hover:bg-[#2a2a2a]"
+                }`}
+              >
+                {tag}
+              </button>
+            ))}
+          </div>
 
-        <div className="flex flex-wrap gap-2 justify-center mb-8">
-          {uniqueTags.map((tag) => (
-            <button
-              key={tag}
-              onClick={() => setActiveTag(activeTag === tag ? null : tag)}
-              className={`px-3 py-1 rounded-full text-sm font-medium border transition-all duration-200 hover:scale-105 ${
-                activeTag === tag
-                  ? "bg-[#f3f97a] text-black shadow"
-                  : "bg-[#1a1a1a] text-white border-[#333] hover:bg-[#2a2a2a]"
-              }`}
-            >
-              {tag}
-            </button>
-          ))}
+          <div className="max-w-xl mx-auto mb-6">
+            <input
+              type="text"
+              value={searchNote}
+              onChange={(e) => setSearchNote(e.target.value)}
+              placeholder="Search by title or content..."
+              className="w-full bg-[#1a1a1a] text-white placeholder-gray-500 rounded-md p-3 focus:outline-none focus:ring-2 focus:ring-[#f3f97a] transition"
+            />
+          </div>
+
+          <button
+            onClick={toggleReadStatus}
+            className="rounded-md bg-pink-400 hover:bg-pink-300 transition px-4 py-2 font-medium text-black mb-6"
+          >
+            {allSelectedRead ? "Mark as Unread" : "Mark as Read"}
+          </button>
         </div>
 
         {filteredNotes.map((note) => (
