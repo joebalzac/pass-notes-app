@@ -111,12 +111,7 @@ const NoteCard = () => {
   };
 
   const toggleReadStatus = () => {
-    setAllNotes(
-      notes.map((note) => ({
-        ...note,
-        read: selectedNoteIds.includes(note.id) ? true : note.read,
-      }))
-    );
+    setAllNotes;
   };
 
   const allSelectedRead = selectedNoteIds.every(
@@ -220,9 +215,14 @@ const NoteCard = () => {
         {/* Mark as Read Button */}
         <button
           onClick={toggleReadStatus}
-          className="rounded-md bg-pink-400 hover:bg-pink-300 transition px-4 py-2 text-xs sm:text-sm font-medium text-black"
+          disabled={selectedNoteIds.length === 0}
+          className={`rounded-md transition px-4 py-2 text-xs sm:text-sm font-medium ${
+            selectedNoteIds.length
+              ? "bg-pink-400 hover:bg-pink-300 text-black"
+              : "bg-gray-700 text-gray-400 cursor-not-allowed"
+          }`}
         >
-          {allSelectedRead ? "Mark as Unread" : "Mark as Read"}
+          Toggle Read Status
         </button>
       </div>
 
