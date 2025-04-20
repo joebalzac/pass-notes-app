@@ -1,4 +1,4 @@
-#!/Users/joebalzac/brain-dump-app/backend/venv/bin/python3
+#!/Users/joebalzac/pass-notes-app/backend/venv/bin/python3
 # -*- coding: utf-8 -*-
 import re
 import sys
