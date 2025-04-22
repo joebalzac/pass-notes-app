@@ -153,7 +153,7 @@ const NoteCard = () => {
           PassNotes
         </h1>
         <p className="text-gray-500 text-sm">
-          A clean space to leave thoughtful notes 💬
+          A clean space to leave daily notes 💬
         </p>
       </div>
 
