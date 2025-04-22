@@ -11,8 +11,9 @@ const NoteCard = () => {
   const [editingTitle, setEditingTitle] = useState("");
   const [editingContent, setEditingContent] = useState("");
   const [editingTags, setEditingTags] = useState("");
-
   const [editingId, setEditingId] = useState<string | null>(null);
+
+  
   const [selectedNote, setSelectedNote] = useState<Note | null>(null);
   const [searchNote, setSearchNote] = useState<string>("");
   const [selectedNoteIds, setSelectedNoteIds] = useState<string[]>([]);
