@@ -13,7 +13,6 @@ const NoteCard = () => {
   const [editingTags, setEditingTags] = useState("");
   const [editingId, setEditingId] = useState<string | null>(null);
 
-  
   const [selectedNote, setSelectedNote] = useState<Note | null>(null);
   const [searchNote, setSearchNote] = useState<string>("");
   const [selectedNoteIds, setSelectedNoteIds] = useState<string[]>([]);
@@ -319,7 +318,7 @@ const NoteCard = () => {
         </div>
 
         <div>
-          {selectedNote ? (
+          {selectedNote && (
             <div className="border rounded-lg px-4 py-3 sm:px-5 sm:py-4 transition-all shadow-sm hover:shadow-md bg-gradient-to-br from-[#1a1a1a] via-[#121212] to-[#1f1f1f] border-[#2a2a2a] cursor-pointer">
               <h3 className="text-base sm:text-lg font-semibold text-white tracking-tight leading-tight">
                 {selectedNote.title}
@@ -329,8 +328,6 @@ const NoteCard = () => {
                 {selectedNote.content}
               </p>
             </div>
-          ) : (
-            <div>Select a note to read...</div>
           )}
         </div>
       </div>
