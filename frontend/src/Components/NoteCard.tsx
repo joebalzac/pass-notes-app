@@ -5,6 +5,16 @@ import { FaPencil, FaTrashCan } from "react-icons/fa6";
 
 const NoteCard = () => {
   const { notes, isLoading, error } = useData();
+
+  useEffect(() => {
+    if (error) {
+      const savedNotes = localStorage.getItem("passnotes");
+      if (savedNotes) {
+        setAllNotes(JSON.parse(savedNotes));
+      }
+    }
+  });
+
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [allNotes, setAllNotes] = useState(notes);
@@ -21,6 +31,10 @@ const NoteCard = () => {
 
   useEffect(() => {
     setAllNotes(notes);
+
+    if (notes.length) {
+      localStorage.setItem("passnotes", JSON.stringify(notes));
+    }
   }, [notes]);
 
   if (isLoading)
