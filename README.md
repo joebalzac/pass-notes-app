@@ -1,5 +1,7 @@
 # 📝 PassNotes
 
+(Still a work in progress, adding features and updates daily)
+
 A sleek, modern note-taking app built with **React**, **TypeScript**, and **Tailwind CSS**, powered by a **FastAPI** backend.
 
 PassNotes is a minimalist dark-mode note app for creating, organizing, and managing thoughts. Add tags, search through your notes, and toggle their read status with ease — all in a beautifully responsive UI.
