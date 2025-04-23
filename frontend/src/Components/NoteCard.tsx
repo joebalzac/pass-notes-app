@@ -133,10 +133,6 @@ const NoteCard = () => {
     setSelectedNoteIds([]);
   };
 
-  // const allSelectedRead = selectedNoteIds.every(
-  //   (id) => allNotes.find((note) => note.id === id)?.read === true
-  // );
-
   const uniqueTags = Array.from(
     new Set(allNotes.flatMap((note) => note.tags.map((tag) => tag.trim())))
   );
