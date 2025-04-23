@@ -12,7 +12,7 @@ const NoteCard = () => {
   const [editingContent, setEditingContent] = useState("");
   const [editingTags, setEditingTags] = useState("");
   const [editingId, setEditingId] = useState<string | null>(null);
-
+  const [sortNewestFirst, setNewestFirst] = useState(true);
   const [selectedNote, setSelectedNote] = useState<Note | null>(null);
   const [searchNote, setSearchNote] = useState<string>("");
   const [selectedNoteIds, setSelectedNoteIds] = useState<string[]>([]);
@@ -111,12 +111,19 @@ const NoteCard = () => {
   };
 
   const toggleReadStatus = () => {
-    setAllNotes;
+    setAllNotes((prev) =>
+      prev.map((note) =>
+        selectedNoteIds.includes(note.id)
+          ? { ...note, read: !note.read }
+          : note
+      )
+    );
+    setSelectedNoteIds([]);
   };
 
-  const allSelectedRead = selectedNoteIds.every(
-    (id) => allNotes.find((note) => note.id === id)?.read === true
-  );
+  // const allSelectedRead = selectedNoteIds.every(
+  //   (id) => allNotes.find((note) => note.id === id)?.read === true
+  // );
 
   const uniqueTags = Array.from(
     new Set(allNotes.flatMap((note) => note.tags.map((tag) => tag.trim())))
@@ -131,9 +138,11 @@ const NoteCard = () => {
     return matchesTag && matchesSearch;
   });
 
-  const sortedFilteredNotes = filteredNotes.sort((a, b) =>
-    a.title.localeCompare(b.title)
-  );
+  const sortedFilteredNotes = filteredNotes.sort((a, b) => {
+    const dateA = new Date(a.created_at).getTime();
+    const dateB = new Date(b.created_at).getTime();
+    return sortNewestFirst ? dateA - dateB : dateB - dateA;
+  });
 
   const formatDateTime = (iso: string) => {
     const date = new Date(iso);
@@ -210,6 +219,10 @@ const NoteCard = () => {
               {tag}
             </button>
           ))}
+
+          {/* Toggle Sort button */}
+
+
         </div>
 
         {/* Mark as Read Button */}
