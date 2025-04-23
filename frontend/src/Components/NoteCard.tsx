@@ -113,9 +113,7 @@ const NoteCard = () => {
   const toggleReadStatus = () => {
     setAllNotes((prev) =>
       prev.map((note) =>
-        selectedNoteIds.includes(note.id)
-          ? { ...note, read: !note.read }
-          : note
+        selectedNoteIds.includes(note.id) ? { ...note, read: !note.read } : note
       )
     );
     setSelectedNoteIds([]);
@@ -221,8 +219,12 @@ const NoteCard = () => {
           ))}
 
           {/* Toggle Sort button */}
-
-
+          <button
+            onClick={() => setNewestFirst((prev) => !prev)}
+            className="text-xs sm:text-sm bg-[#2a2a2a] text-white px-4 py-2 rounded-md hover:bg-[#3a3a3a] transition cursor-pointer"
+          >
+            Sort: {sortNewestFirst ? "Newest → Oldest" : "Oldest → Newest"}
+          </button>
         </div>
 
         {/* Mark as Read Button */}
