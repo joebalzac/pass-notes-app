@@ -15,19 +15,22 @@ const NoteCardTwo = () => {
     }
   });
 
+  const [allNotes, setAllNotes] = useState(notes);
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
-  const [allNotes, setAllNotes] = useState(notes);
+  const [tags, setTags] = useState("");
+  
   const [editingTitle, setEditingTitle] = useState("");
   const [editingContent, setEditingContent] = useState("");
   const [editingTags, setEditingTags] = useState("");
   const [editingId, setEditingId] = useState<string | null>(null);
+  
   const [sortNewestFirst, setNewestFirst] = useState(true);
   const [selectedNote, setSelectedNote] = useState<Note | null>(null);
   const [searchNote, setSearchNote] = useState<string>("");
   const [selectedNoteIds, setSelectedNoteIds] = useState<string[]>([]);
   const [activeTag, setActiveTag] = useState<string | null>(null);
-  const [tags, setTags] = useState("");
+ 
 
   useEffect(() => {
     setAllNotes(notes);

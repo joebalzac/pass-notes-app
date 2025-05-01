@@ -1,22 +1,21 @@
-import { useEffect, useState } from "react";
-import useData from "../Hooks/useData";
-import axios from "axios";
+import React, { useState } from "react";
+import useData, { Note } from "../Hooks/useData";
+import axios, { all } from "axios";
 
 const NoteCardDemo = () => {
   const { notes, isLoading, error } = useData();
+
   const [allNotes, setAllNotes] = useState(notes);
+
   const [title, setTitle] = useState("");
-  const [content, setContent] = useState("");
-  const [tags, setTags] = useState("");
-
   const [editingTitle, setEditingTitle] = useState("");
-  const [editingContent, setEditingContent] = useState("");
-  const [editingTags, setEditingTags] = useState("");
-  const [editingId, setEditingId] = useState("");
+  const [editingId, setEditingId] = useState<string>();
 
-  useEffect(() => {
-    setAllNotes(notes);
-  });
+  const [content, setContent] = useState("");
+  const [editingContent, setEditingContent] = useState("");
+
+  const [tags, setTags] = useState("");
+  const [editingTags, setEditingTags] = useState<string[]>([]);
 
   const handleAddNote = async () => {
     try {
@@ -31,26 +30,35 @@ const NoteCardDemo = () => {
       setContent("");
       setTags("");
     } catch (err) {
-      console.log("Failed to add note");
+      if (err) {
+        console.log("An unknown error has occurred");
+      }
     }
   };
 
-  const handleDeleteNote = async (noteId: string) => {
+  const handleDeleteNote = async (notedId: string) => {
+    await axios.delete(`http://localhost:8000/notes/${notedId}`);
+    setAllNotes(allNotes.filter((note) => note.id !== notedId));
+  };
+
+  const handleEditNote = (note: Note) => {
+    setEditingTitle(note.title);
+    setEditingContent(note.content);
+    setEditingTags(note.tags);
+    setEditingId(note.id);
+  };
+
+  const handleSaveNote = async (noteId: string) => {
+    if (!editingId) return;
+
     try {
-      await axios.delete(`http://localhost:8000/notes/${noteId}`);
-      setAllNotes((prev) => prev.filter((note) => note.id !== noteId));
+      const res = await axios.put(`http://localhost:8000/notes/${noteId}`);
     } catch (err) {
-      console.log("Unable to delete note");
+      if (err) {
+        console.log("Unable to edit");
+      }
     }
   };
-
-  if (isLoading) {
-    <div>Loading....</div>;
-  }
-
-  if (error) {
-    <div>An unknown error has ocurred</div>;
-  }
 
   return <div>NoteCardDemo</div>;
 };
