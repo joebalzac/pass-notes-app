@@ -9,13 +9,13 @@ const NoteCardDemo = () => {
 
   const [title, setTitle] = useState("");
   const [editingTitle, setEditingTitle] = useState("");
-  const [editingId, setEditingId] = useState<string>();
+  const [editingId, setEditingId] = useState<string | null>(null);
 
   const [content, setContent] = useState("");
   const [editingContent, setEditingContent] = useState("");
 
   const [tags, setTags] = useState("");
-  const [editingTags, setEditingTags] = useState<string[]>([]);
+  const [editingTags, setEditingTags] = useState("");
 
   const handleAddNote = async () => {
     try {
@@ -44,15 +44,31 @@ const NoteCardDemo = () => {
   const handleEditNote = (note: Note) => {
     setEditingTitle(note.title);
     setEditingContent(note.content);
-    setEditingTags(note.tags);
+    setEditingTags(note.tags.join(","));
     setEditingId(note.id);
   };
 
-  const handleSaveNote = async (noteId: string) => {
+  const handleSaveNote = async () => {
     if (!editingId) return;
 
+    const currentNote = allNotes.find((n) => n.id === editingId);
+
     try {
-      const res = await axios.put(`http://localhost:8000/notes/${noteId}`);
+      const res = await axios.put(`http://localhost:8000/notes/${editingId}`, {
+        title: editingTitle,
+        content: editingContent,
+        tags: editingTags.split(",").map((tag) => tag.trim()),
+        read: currentNote?.read,
+        created_at: currentNote?.created_at,
+        updated_at: currentNote?.updated_at,
+      });
+      setAllNotes((prev) =>
+        prev.map((note) => (note.id === editingId ? res.data : note))
+      );
+      setEditingId("");
+      setEditingContent("");
+      setEditingTags("");
+      setEditingId(null);
     } catch (err) {
       if (err) {
         console.log("Unable to edit");
